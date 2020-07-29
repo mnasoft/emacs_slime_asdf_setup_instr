@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <meta charset="utf-8"> 
+  </head>
+  <body>
+    <h1>Установка Common Lisp(SBCL) на Windows<h1>
+    <h2>1. Установка sbcl</h2>
+    <p>Установите sbcl из файла <a href="sbcl-1.2.7-x86-windows-binary.msi">sbcl-1.2.7-x86-windows-binary.msi</a>.</p>
+    <p>При установке используйте следующий путь: <a href="file:///d:/prg/sbcl">d:/prg/sbcl</a> </p>
+    <h2>2. Установка Emacs.</h2>
+    <p>Распакуйте Emacs из файла при помощи 7zip: <a href="emacs-24.4-bin-i686-pc-mingw32.zip">emacs-24.4-bin-i686-pc-mingw32.zip</a>. </p>
+    <p>При выполнении распаковки используйте следующий путь: <a href="file:///d:/prg/emacs">d:/prg/emacs</a>.</p>
+    <p>Запустите на выполнение выполняемый файл базовой настройки emacs:
+      <a href="file:///d:/prg/emacs/bin/addpm.exe">d:/prg/emacs/bin/addpm.exe</a>.</p>
+    <h2>3. Подготовка каталога для хранения Lisp проектов и настройки Quicklisp</h2>
+    <p>Создайте каталог <a href="file:///d:/home/_namatv/git/clisp">d:/home/_namatv/git/clisp</a>,
+      в котором вы будете хранить ваши проекты, написанные на языке Lisp
+      (конечно, вы можете использовать каталог Quicklisp по умолчанию:
+      <a href="file:///c:/users/namatv/quicklisp/local-projects">c:/users/namatv/quicklisp/local-projects</a>,
+      однако <a href="file:///c:/lisp">c:/lisp</a> (а в нашем случае <a href="file:///d:/home/_namatv/git/clisp">d:/home/_namatv/git/clisp</a>)
+      лучше нежели <a href="file:///c:/users/<username>/quicklisp/local-projects">c:/users/namatv/quicklisp/local-projects</a>).</p>
+    <h2>4. Установка Quicklisp и SLIME</h2>
+    <h2>при работающем подключении к Интернет</h2>
+    <ol>
+      <li> Скопируйте файл <a href="file:///d:/home/_namatv/Downloads/Emacs/lisp/quicklisp.lisp"></a>
+	в каталог <a href="file:///d:/home/_namatv/git/clisp">d:/home/_namatv/git/clisp</a>. </li>
+      <li> Запустите на выполнение ваш интерпретатор Lisp <a href="file:///d:/prg/sbcl">d:/prg/sbcl</a>
+	и выполните в интерпретаторе следующую команду:
+	<code><pre>
+(load "d:/home/_namatv/git/clisp/quicklisp.lisp")</pre></code>
+      </li>
+      <li> Затем последовательно выполните следующие инструкции:
+	<code><pre>
+(quicklisp-quickstart:install)
+(ql:add-to-init-file)
+(ql:quickload "quicklisp-slime-helper")
+(ql:quickload "quickproject")</pre></code>
+      </li>
+    </ol>
+    <h2>при неработающем подключении к Интернет</h2>
+    <ol>
+      <li> Распакуйте файл <a href="file:///d:/home/_namatv/Downloads/Emacs/zip/quicklisp.7z">quicklisp.7z</a>
+	в домашний каталог пользователя <a href="file:///C:/Users/namatv/">C:/Users/namatv/</a>.
+	При этом в домашнем каталое пользователя будет создан каталог
+	<a href="file:///C:/Users/namatv/quicklisp">C:/Users/namatv/quicklisp</a>.</li>
+    </ol>
+    <h2>5. Настройка Emacs для использования SLIME </h2>
+    <ol>
+    <li>Создайте в каталоге <a href="file:///C:/Users/namatv/AppData/Roaming/">C:/Users/namatv/AppData/Roaming/</a>
+      файл <code>.emacs</code> со следующим содержимым:
+      <code>
+	<pre>
+(add-to-list 'exec-path "d:/prg/sbcl") ;; расположение каталога с SBCL или другим интерпретатором Lisp
+(load (expand-file-name "~/quicklisp/slime-helper.el"))
+(setq inferior-lisp-program "sbcl") ;; имя программы интерпретатора Lisp
+(slime-setup '(slime-fancy slime-asdf)) ;; список расширений SLIME
+(add-hook 'slime-mode-hook
+          '(lambda ()
+            (set-variable lisp-indent-function 'common-lisp-indent-function)
+            (define-key slime-mode-map [tab] 'slime-indent-and-complete-symbol)
+            (define-key slime-mode-map (kbd "C-&lt;tab&gt;") 'slime-complete-symbol))) ;; добавление хуков SLIME
+	</pre>
+      </code>
+    </li>
+    <li>Скопируйте файл <code> c:/users/namatv/.sbclrc</code>, созданный в п.4 при помощи команды <code>(ql:add-to-init-file)</code>, в каталог <a href="C:/Users/namatv/AppData/Roaming/">C:/Users/namatv/AppData/Roaming/</a></li>
+    <li>Рабочим каталогом Emacs является <code>c:/users/namatv/AppData/Roaming/</code>, в то время как инфраструктура Quicklisp использует в качестве домашнего каталога <code>c:/users/namatv/</code>. Наиболее простой способ устранения этого противоречия - создание символической ссылки (Janction) quicklisp в домашнем каталоге Emacs. Для этого запустите на выполнение итерпретатор командной строки (Win-R и <code>cmd</code>), после чего в интерпретаторе выполните следующий код:
+      <code><pre>cd AppData\Roaming
+	  mklink /J quicklisp ..\..\quicklisp</pre></code></li></ol>
+    <h2>6. Настройка системы asdf:</h2>
+    <ul>
+    <li><p>Для OS Windows создайте или измените содержимое файла
+      <a href="file:///C:/Users/namatv/AppData/Roaming/.config/common-lisp/source-registry.conf.d/asdf.conf">
+	C:/Users/namatv/AppData/Roaming/.config/common-lisp/source-registry.conf.d/asdf.conf</a> на следующее:</p>
+      <code><pre>(:tree "D:/home/_namatv/git/clisp/")
+;;;; Ключ :tree задает каталог, начиная с которого сиситема asdf рекурсивно
+;;;; (во всех подкаталогах) будет искать файлы с расширением *.asd.
+;;;; В этих файлах должны находиться описания загружаемых систем.</pre></code></li>
+    <li><p>Для OS Linux создайте или измените содержимое файла
+      <a href="file:///home/namatv/.config/common-lisp/source-registry.conf.d/asdf.conf">
+	/home/namatv/.config/common-lisp/source-registry.conf.d/asdf.conf</a> на следующее:</p>
+    <code><pre>(:tree "~/MyDoc/git/clisp/")
+;;;; Ключ :tree задает каталог, начиная с которого сиситема asdf рекурсивно
+;;;; (во всех подкаталогах) будет искать файлы с расширением *.asd.
+;;;; В этих файлах должны находиться описания загружаемых систем.</pre></code></li></ul>
+  </body>
+<html>
